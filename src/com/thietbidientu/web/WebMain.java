@@ -299,7 +299,7 @@ public class WebMain {
         b.append("<div class='banner-content'>");
         b.append("<span class='banner-badge'>HỆ THỐNG THIẾT BỊ ĐIỆN TỬ TECHNEST</span>");
         b.append("<h1>Thiết Bị Công Nghệ Chính Hãng · Giá Tốt Mỗi Ngày</h1>");
-        b.append("<p>Cung cấp điện thoại thông minh, máy tính xách tay và phụ kiện chính hãng phục vụ học tập, công việc và giải trí.</p>");
+        b.append("<p>Chuyên cung cấp điện thoại thông minh, máy tính xách tay và phụ kiện công nghệ chính hãng, cam kết chất lượng hàng đầu.</p>");
         b.append("</div>");
         b.append("<div class='banner-perks'>");
         b.append("<div class='perk-item'><span class='perk-icon'>✓</span><div><strong>100% Chính hãng</strong><small>Cam kết chất lượng</small></div></div>");
@@ -393,13 +393,7 @@ public class WebMain {
                 form(s, "login", input("email", "Địa chỉ Email", "", "email", "placeholder='a@gmail.com, b@shop.vn…'") +
                         input("password", "Mật khẩu", "", "password", "placeholder='Nhập mật khẩu…'") +
                         "<button class='button primary wide btn-auth-submit'>Đăng nhập ngay</button>") +
-                "<div class='auth-footer'><p>Chưa có tài khoản khách hàng? <a href='/register'>Đăng ký tại đây</a></p></div>" +
-                "<div class='note demo-box'><div class='demo-title'>TÀI KHOẢN MẪU DÙNG ĐÁNH GIÁ ĐỒ ÁN</div>" +
-                "<table class='demo-table'><thead><tr><th>Vai trò</th><th>Email</th><th>Mật khẩu</th></tr></thead><tbody>" +
-                "<tr><td><span class='role-tag role-customer'>Khách hàng</span></td><td><code>a@gmail.com</code></td><td><code>matkhau123</code></td></tr>" +
-                "<tr><td><span class='role-tag role-staff'>Nhân viên</span></td><td><code>b@shop.vn</code></td><td><code>matkhau456</code></td></tr>" +
-                "<tr><td><span class='role-tag role-admin'>Quản trị viên</span></td><td><code>admin@shop.vn</code></td><td><code>admin123</code></td></tr>" +
-                "</tbody></table></div></section>";
+                "<div class='auth-footer'><p>Chưa có tài khoản khách hàng? <a href='/register'>Đăng ký tại đây</a></p></div></section>";
     }
 
     private static String register(Session s) {
@@ -568,7 +562,7 @@ public class WebMain {
         b.append("</tbody></table></div>");
 
         b.append("<div class='invoice-total-section'>");
-        b.append("<div class='invoice-notes'><p><strong>Ghi chú:</strong> Phiếu phục vụ đồ án học phần Phân tích & Thiết kế Phần mềm. Khách hàng được quyền kiểm tra hàng trước khi nhận.</p></div>");
+        b.append("<div class='invoice-notes'><p><strong>Ghi chú:</strong> Quý khách vui lòng đồng kiểm sản phẩm khi nhận hàng. Đổi trả trong 7 ngày đối với lỗi từ nhà sản xuất. Hotline CSKH: 1800 6868.</p></div>");
         b.append("<div class='invoice-total-box'><span class='muted'>Tổng cộng thanh toán:</span><strong class='invoice-total-price'>").append(money(d.tinhTongTien())).append("</strong></div>");
         b.append("</div>");
         b.append("</section></div>");
@@ -704,7 +698,7 @@ public class WebMain {
         s.flash = "";
 
         return "<!doctype html><html lang='vi'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>TechNest · Hệ thống thiết bị điện tử</title><link rel='stylesheet' href='/style.css'></head><body>" +
-                "<div class='topline'><div class='topline-inner'><span>TECHNEST — THIẾT BỊ ĐIỆN TỬ CHÍNH HÃNG</span><span class='topline-right'>Hotline: 1800 6868 · Giao hàng COD toàn quốc · Dữ liệu mẫu đồ án môn học</span></div></div>" +
+                "<div class='topline'><div class='topline-inner'><span>TECHNEST — THIẾT BỊ ĐIỆN TỬ CHÍNH HÃNG</span><span class='topline-right'>Hotline: 1800 6868 · Giao hàng COD toàn quốc · Bảo hành chính hãng 12 tháng</span></div></div>" +
                 "<header><div class='header-inner'>" +
                 "<a class='brand' href='/'><b>t<span>n</span></b> TechNest<span class='brand-dot'>.</span></a>" +
                 "<form class='header-search' method='get' action='/'>" +
@@ -716,9 +710,9 @@ public class WebMain {
                 "<nav class='subnav-bar'><div class='subnav-inner'>" + nav + "</div></nav>" +
                 "<main>" + flash + body + "</main>" +
                 "<footer><div class='footer-inner'>" +
-                "<div class='footer-brand'><a class='brand' href='/'>TechNest<span class='brand-dot'>.</span></a><p>Website thương mại điện tử quản lý và bán thiết bị điện tử phục vụ học phần Phân tích và thiết kế phần mềm.</p></div>" +
-                "<div class='footer-col'><strong>Hỗ trợ khách hàng</strong><span>Chính hãng 100% · Đổi trả 7 ngày</span><span>Thanh toán khi nhận hàng (COD)</span></div>" +
-                "<div class='footer-col'><strong>Môi trường thử nghiệm</strong><span>Kiến trúc mẫu thiết kế GoF & OOP</span><span>Dữ liệu In-Memory tự đặt lại khi tắt máy chủ</span></div>" +
+                "<div class='footer-brand'><a class='brand' href='/'>TechNest<span class='brand-dot'>.</span></a><p>Hệ thống bán lẻ thiết bị công nghệ, điện thoại, máy tính xách tay và phụ kiện chính hãng với dịch vụ bảo hành toàn diện.</p></div>" +
+                "<div class='footer-col'><strong>Hỗ trợ khách hàng</strong><span>Chính hãng 100% · Đổi trả 7 ngày</span><span>Thanh toán khi nhận hàng (COD)</span><span>Tổng đài CSKH: 1800 6868</span></div>" +
+                "<div class='footer-col'><strong>Về TechNest</strong><span>Hệ thống phân phối ủy quyền chính hãng</span><span>Chính sách bảo mật & Điều khoản sử dụng</span><span>Hệ thống cửa hàng trên toàn quốc</span></div>" +
                 "</div></footer></body></html>";
     }
 

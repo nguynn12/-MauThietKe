@@ -305,6 +305,7 @@ public class WebMain {
             filters.add(new LocTheoKhoangGia(0, limit));
         }
         var list = products.timKiemSanPham(filters);
+        System.out.printf("   [Mẫu Strategy] Lọc sản phẩm (Từ khóa='%s', Danh mục=%d, Giá tối đa='%s') -> Kết quả: %d sản phẩm%n", keyword, cat, max, list.size());
 
         StringBuilder b = new StringBuilder();
         b.append("<section class='store-banner'>");
@@ -321,16 +322,26 @@ public class WebMain {
         b.append("</section>");
 
         b.append("<section id='catalog'>");
+        b.append("<div class='category-pills'>");
+        b.append("<a href='/' class='pill-btn ").append(cat == 0 ? "active" : "").append("'>Tất cả</a>");
+        for (DanhMuc c : db.bangDanhMuc().values()) {
+            b.append("<a href='/?category=").append(c.getMaDanhMuc()).append("' class='pill-btn ")
+             .append(cat == c.getMaDanhMuc() ? "active" : "").append("'>")
+             .append(c.getMaDanhMuc() == 1 ? "📱 " : c.getMaDanhMuc() == 2 ? "💻 " : "🎧 ")
+             .append(h(c.getTenDanhMuc())).append("</a>");
+        }
+        b.append("</div>");
+
         b.append("<div class='panel filter-panel'>");
         b.append("<div class='filter-header'>");
         b.append("<div><span class='eyebrow'>DANH MỤC & TÌM KIẾM</span><h2 class='filter-title'>Bộ lọc sản phẩm</h2></div>");
         b.append("<span class='product-count'>Hiển thị <strong>").append(list.size()).append("</strong> sản phẩm</span>");
         b.append("</div>");
-        b.append("<form class='filters' method='get' action='/#catalog'>");
+        b.append("<form class='filters' method='get' action='/'>");
         b.append("<label>Tìm theo tên sản phẩm<input name='q' placeholder='VD: iPhone, MacBook, Tai nghe…' value='").append(h(keyword)).append("'></label>");
-        b.append("<label>Danh mục thiết bị<select name='category'><option value='0'>Tất cả danh mục</option>").append(categoryOptions(cat)).append("</select></label>");
+        b.append("<label>Danh mục thiết bị<select name='category' onchange='this.form.submit()'><option value='0'>Tất cả danh mục</option>").append(categoryOptions(cat)).append("</select></label>");
         b.append("<label>Giá tối đa (₫)<input name='max' type='number' min='0' placeholder='Không giới hạn giá' value='").append(h(max)).append("'></label>");
-        b.append("<div class='filter-buttons'><button type='submit' class='button primary'>Lọc sản phẩm</button><a class='button secondary' href='/#catalog'>Đặt lại</a></div>");
+        b.append("<div class='filter-buttons'><button type='submit' class='button primary'>Lọc sản phẩm</button><a class='button secondary' href='/'>Đặt lại</a></div>");
         b.append("</form>");
         b.append("</div>");
 
@@ -698,7 +709,10 @@ public class WebMain {
     }
 
     private static String layout(Session s, String path, String body) {
-        String nav = nav(path, "/", "Cửa hàng");
+        String nav = nav(path, "/", "Cửa hàng") +
+                nav(path, "/?category=1", "Điện thoại") +
+                nav(path, "/?category=2", "Laptop") +
+                nav(path, "/?category=3", "Phụ kiện");
         int cartCount = 0;
         if (s.user instanceof KhachHang) {
             cartCount = carts.layGioHang(s.user.getMaNguoiDung()).getDanhSachChiTiet().stream().mapToInt(ChiTietGioHang::getSoLuong).sum();
@@ -1037,6 +1051,10 @@ main{max-width:1240px;margin:0 auto;padding:22px 20px 48px;min-height:calc(100vh
 .product h3 a:hover{color:var(--primary);text-decoration:underline}
 .price-row{display:flex;justify-content:space-between;align-items:baseline;margin:8px 0 10px;margin-top:auto}
 .price-row strong{font-size:18px;color:var(--primary);font-weight:700}
+.category-pills{display:flex;gap:10px;margin:20px 0 16px;flex-wrap:wrap}
+.pill-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 18px;border-radius:24px;background:#fff;color:#334155;text-decoration:none;font-weight:600;font-size:13px;border:1px solid #cbd5e1;box-shadow:0 1px 2px rgba(0,0,0,.04);transition:all .15s}
+.pill-btn:hover{background:#eff6ff;color:var(--primary);border-color:#93c5fd}
+.pill-btn.active{background:var(--primary);color:#fff;border-color:var(--primary);box-shadow:0 2px 4px rgba(30,58,138,.2)}
 .product-actions{display:flex;gap:8px;align-items:center}
 .product-actions .button{flex:1;text-align:center;padding:8px 12px;font-size:13px}
 .product-actions form{display:contents}

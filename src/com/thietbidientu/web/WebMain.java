@@ -69,6 +69,7 @@ public class WebMain {
             send(x, 200, "text/css", CSS);
             return;
         }
+        System.out.printf("[HTTP] %-4s %s%n", x.getRequestMethod(), path);
         Session s = session(x);
         try {
             if (x.getRequestMethod().equals("POST")) {
@@ -135,6 +136,7 @@ public class WebMain {
                 require(u != null && u.dangNhap(f.get("email"), f.getOrDefault("password", "")), "Email hoặc mật khẩu không đúng.");
                 s.user = u;
                 s.flash = "Đăng nhập thành công. Chào mừng " + u.getHoTen() + "!";
+                System.out.printf("   [Hệ Thống] Đăng nhập thành công: %s (Vai trò: %s)%n", u.getHoTen(), role(u));
                 return "/";
             }
             case "register": {
@@ -166,6 +168,7 @@ public class WebMain {
                 int n = number(f, "quantity", 1, 9999);
                 carts.themVaoGio(c.getMaNguoiDung(), p, n);
                 s.flash = "Đã thêm " + p.getTenSanPham() + " (SL: " + n + ") vào giỏ hàng.";
+                System.out.printf("   [Giỏ Hàng] %s thêm %s (SL: %d) vào giỏ hàng%n", c.getHoTen(), p.getTenSanPham(), n);
                 return "/cart";
             }
             case "quantity": {
@@ -191,6 +194,8 @@ public class WebMain {
                 String address = required(f, "address");
                 DonHang d = orders.datHang(c, carts.layGioHang(c.getMaNguoiDung()), address);
                 s.flash = "Đặt hàng thành công! Mã đơn #" + d.getMaDonHang() + ". Thanh toán khi nhận hàng.";
+                System.out.printf("   [Mẫu Builder] Khởi tạo đơn hàng #%d cho khách hàng %s (Tổng tiền: %s)%n", d.getMaDonHang(), c.getHoTen(), money(d.tinhTongTien()));
+                System.out.printf("   [Mẫu State] Trạng thái đơn ban đầu: %s%n", d.getTenTrangThai());
                 return "/orders";
             }
             case "cancel": {
@@ -206,9 +211,16 @@ public class WebMain {
                 staffOnly(s);
                 int id = id(f);
                 ownedOrder(s, id);
-                if (op.equals("confirm")) orders.xacNhanDonHang(employee(s), id);
-                else if (op.equals("ship")) orders.giaoHang(id);
-                else orders.hoanTatDonHang(id);
+                if (op.equals("confirm")) {
+                    orders.xacNhanDonHang(employee(s), id);
+                    System.out.printf("   [Mẫu State + Observer] Nhân viên %s xác nhận đơn #%d -> Chuyển sang Đã xác nhận%n", employee(s).getHoTen(), id);
+                } else if (op.equals("ship")) {
+                    orders.giaoHang(id);
+                    System.out.printf("   [Mẫu State + Observer] Đơn #%d chuyển sang Đang giao%n", id);
+                } else {
+                    orders.hoanTatDonHang(id);
+                    System.out.printf("   [Mẫu State + Observer] Đơn #%d đã giao thành công -> Chuyển sang Hoàn tất%n", id);
+                }
                 s.flash = "Đã cập nhật trạng thái đơn #" + id + ".";
                 return "/orders";
             }
@@ -339,7 +351,14 @@ public class WebMain {
             b.append("<div class='price-row'>");
             b.append("<strong>").append(money(p.getGia())).append("</strong>");
             b.append("</div>");
-            b.append("<a class='button secondary wide' href='/product?id=").append(p.getMaSanPham()).append("'>Xem chi tiết →</a>");
+            b.append("<div class='product-actions'>");
+            b.append("<a class='button secondary' href='/product?id=").append(p.getMaSanPham()).append("'>Xem chi tiết</a>");
+            if (s.user instanceof KhachHang) {
+                b.append(form(s, "add", hidden("id", p.getMaSanPham()) + hidden("quantity", 1) + "<button class='button primary' " + (p.getSoLuongTonKho() == 0 ? "disabled" : "") + ">" + (p.getSoLuongTonKho() == 0 ? "Hết hàng" : "+ Giỏ") + "</button>"));
+            } else {
+                b.append("<a class='button primary' href='/product?id=").append(p.getMaSanPham()).append("'>Mua ngay</a>");
+            }
+            b.append("</div>");
             b.append("</div>");
             b.append("</article>");
         }
@@ -358,7 +377,11 @@ public class WebMain {
                     "<div class='detail-buy-row'><label class='qty-label'>Số lượng đặt mua<input name='quantity' type='number' min='1' max='" + p.getSoLuongTonKho() + "' value='1' required></label>" +
                     "<button class='button primary btn-add-cart' " + (p.getSoLuongTonKho() == 0 ? "disabled" : "") + ">" + (p.getSoLuongTonKho() == 0 ? "Tạm hết hàng" : "Thêm vào giỏ hàng") + "</button></div>");
         } else if (s.user == null) {
-            action = "<div class='detail-action-prompt'><p class='muted'>Vui lòng đăng nhập tài khoản Khách hàng để chọn mua thiết bị.</p><a class='button primary' href='/login'>Đăng nhập để mua hàng</a></div>";
+            action = "<div class='detail-action-prompt'><p class='muted'>Vui lòng đăng nhập tài khoản Khách hàng để tiến hành mua thiết bị.</p>" +
+                    "<div class='detail-quick-btns'>" +
+                    "<a class='button primary' href='/login'>Đăng nhập để mua hàng</a> " +
+                    form(s, "login", hidden("email", "a@gmail.com") + hidden("password", "matkhau123") + "<button class='button secondary'>⚡ Đăng nhập nhanh (Khách hàng A)</button>") +
+                    "</div></div>";
         } else {
             action = "<div class='detail-action-prompt'><p class='muted'>Bạn đang đăng nhập vai trò " + role(s.user) + ".</p><a class='button secondary' href='/manage?edit=" + id + "'>Chỉnh sửa sản phẩm này</a></div>";
         }
@@ -393,6 +416,20 @@ public class WebMain {
                 form(s, "login", input("email", "Địa chỉ Email", "", "email", "placeholder='a@gmail.com, b@shop.vn…'") +
                         input("password", "Mật khẩu", "", "password", "placeholder='Nhập mật khẩu…'") +
                         "<button class='button primary wide btn-auth-submit'>Đăng nhập ngay</button>") +
+                "<div class='quick-auth-section'>" +
+                "<div class='quick-auth-title'>⚡ Đăng nhập nhanh trải nghiệm:</div>" +
+                "<div class='quick-auth-grid'>" +
+                "<button type='button' class='quick-btn' onclick=\"fillLogin('a@gmail.com','matkhau123')\">🛒 Khách hàng</button>" +
+                "<button type='button' class='quick-btn' onclick=\"fillLogin('b@shop.vn','matkhau456')\">📦 Nhân viên</button>" +
+                "<button type='button' class='quick-btn' onclick=\"fillLogin('admin@shop.vn','admin123')\">👑 Quản trị viên</button>" +
+                "</div></div>" +
+                "<script>" +
+                "function fillLogin(e, p) {" +
+                "  var fe = document.querySelector(\"input[name='email']\");" +
+                "  var fp = document.querySelector(\"input[name='password']\");" +
+                "  if (fe && fp) { fe.value = e; fp.value = p; fe.form.submit(); }" +
+                "}" +
+                "</script>" +
                 "<div class='auth-footer'><p>Chưa có tài khoản khách hàng? <a href='/register'>Đăng ký tại đây</a></p></div></section>";
     }
 
@@ -998,8 +1035,18 @@ main{max-width:1240px;margin:0 auto;padding:22px 20px 48px;min-height:calc(100vh
 .product h3{font-size:16px;margin:4px 0 10px;line-height:1.4}
 .product h3 a{color:var(--ink);text-decoration:none}
 .product h3 a:hover{color:var(--primary);text-decoration:underline}
-.price-row{display:flex;justify-content:space-between;align-items:baseline;margin:8px 0 14px;margin-top:auto}
+.price-row{display:flex;justify-content:space-between;align-items:baseline;margin:8px 0 10px;margin-top:auto}
 .price-row strong{font-size:18px;color:var(--primary);font-weight:700}
+.product-actions{display:flex;gap:8px;align-items:center}
+.product-actions .button{flex:1;text-align:center;padding:8px 12px;font-size:13px}
+.product-actions form{display:contents}
+.quick-auth-section{margin-top:16px;padding:12px 14px;background:#f8fafc;border:1px dashed #cbd5e1;border-radius:8px;text-align:left}
+.quick-auth-title{font-size:12px;font-weight:700;color:var(--primary);margin-bottom:8px}
+.quick-auth-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.quick-btn{padding:7px 4px;background:#fff;border:1px solid #cbd5e1;border-radius:6px;font-size:11px;font-weight:600;color:#334155;cursor:pointer;transition:all .15s}
+.quick-btn:hover{background:#eff6ff;border-color:var(--primary);color:var(--primary)}
+.detail-quick-btns{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:10px}
+.detail-quick-btns form{margin:0}
 .breadcrumb-bar{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);margin-bottom:18px}
 .breadcrumb-bar .sep{color:#cbd5e1}
 .breadcrumb-bar .crumb-cur{color:var(--ink);font-weight:600}
